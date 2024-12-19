@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modern Animation Library</title>
+  <!-- 引入代码高亮库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+  <style>
+    /* 基础样式 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #4f46e5;
+      --secondary: #7c3aed;
+      --accent: #0ea5e9;
+      --background: #030712;
+      --card-bg: rgba(17, 24, 39, 0.7);
+      --text: #e2e8f0;
+      --heading: #f8fafc;
+      --border: rgba(255, 255, 255, 0.1);
+      --shadow: rgba(0, 0, 0, 0.25);
+    }
+
+    body {
+      background: var(--background);
+      color: var(--text);
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(circle at 0% 0%, rgba(79, 70, 229, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 100% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 100%, rgba(14, 165, 233, 0.15) 0%, transparent 50%);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 4rem;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+      margin-bottom: 3rem;
+      background: linear-gradient(135deg,
+          var(--primary),
+          var(--secondary) 50%,
+          var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+      position: relative;
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 6px;
+      background: linear-gradient(90deg,
+          var(--primary),
+          var(--secondary),
+          var(--accent));
+      border-radius: 2px;
+      filter: blur(1px);
+    }
+
+    .animation-card {
+      background: var(--card-bg);
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(24px);
+      box-shadow:
+        0 20px 40px var(--shadow),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      transition:
+        transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+        background-color 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      transform: translateY(0) scale(1);
+      animation: floating-shadow 3s ease-in-out infinite;
+      will-change: transform, box-shadow;
+    }
+
+    .animation-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(255, 255, 255, 0.05),
+          transparent);
+      transition: 0.5s;
+    }
+
+    .animation-card:hover::before {
+      left: 100%;
+    }
+
+    .animation-card:hover {
+      transform:
+        perspective(1000px) translateY(-8px) rotateX(2deg) rotateY(2deg) scale(1.02);
+      animation: card-hover 5s ease-in-out infinite alternate;
+    }
+
+    .animation-card h2 {
+      color: var(--heading);
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: transform 0.3s ease, color 0.3s ease;
+      background: linear-gradient(90deg,
+          var(--primary),
+          var(--secondary),
+          var(--accent),
+          var(--secondary),
+          var(--primary));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: text-shimmer 6s linear infinite;
+    }
+
+    .animation-card h2::before {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 24px;
+      background: linear-gradient(90deg,
+          var(--primary),
+          var(--secondary),
+          var(--accent),
+          var(--secondary),
+          var(--primary));
+      border-radius: 4px;
+      background-size: 200% 100%;
+      animation: shimmer 6s linear infinite;
+      transition: height 0.3s ease, opacity 0.3s ease;
+      opacity: 0.7;
+    }
+
+    .animation-card:hover h2 {
+      transform: translateX(10px);
+      color: var(--accent);
+    }
+
+    .animation-card:hover h2::before {
+      height: 32px;
+      opacity: 1;
+    }
+
+    .demo-section {
+      display: flex;
+      gap: 3rem;
+      margin-bottom: 2rem;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+
+    .demo-section::after {
+      content: '点击查看代码';
+      position: absolute;
+      right: 0;
+      bottom: -25px;
+      font-size: 0.9rem;
+      color: var(--accent);
+      opacity: 0.7;
+    }
+
+    .demo-section.active::after {
+      content: '点击隐藏代码';
+    }
+
+    .demo-box {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg,
+          var(--primary),
+          var(--secondary),
+          var(--accent));
+      border-radius: 1rem;
+      flex-shrink: 0;
+      box-shadow:
+        0 15px 30px rgba(79, 70, 229, 0.3),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      background-size: 200% 200%;
+      animation: gradient-flow 6s ease infinite;
+    }
+
+    .demo-box::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(125deg, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+    }
+
+    .demo-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%,
+          rgba(255, 255, 255, 0.3),
+          transparent 70%);
+      opacity: 0.5;
+    }
+
+    .code-section {
+      background: rgba(17, 24, 39, 0.95);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      border: 1px solid var(--border);
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.2),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: none;
+      opacity: 0;
+      transform: translateY(30px);
+      transition:
+        opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.6s ease;
+    }
+
+    .code-section.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 20px rgba(79, 70, 229, 0.2);
+    }
+
+    .usage-title {
+      font-size: 1.25rem;
+      margin: 1rem 0;
+      color: var(--accent);
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .copy-btn {
+      background: linear-gradient(135deg,
+          var(--primary),
+          var(--secondary),
+          var(--accent));
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 0.5rem;
+      color: white;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 8px 20px rgba(79, 70, 229, 0.3),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+      background-size: 200% 200%;
+      animation: gradient-flow 6s ease infinite;
+    }
+
+    .copy-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent);
+      transition: 0.5s;
+    }
+
+    .copy-btn:hover::before {
+      left: 100%;
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow:
+        0 15px 30px rgba(79, 70, 229, 0.5),
+        0 0 0 2px rgba(255, 255, 255, 0.2),
+        0 0 20px rgba(79, 70, 229, 0.4);
+    }
+
+    pre {
+      border-radius: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+    }
+
+    /* 动画定义 */
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-10px);
+      }
+
+      75% {
+        transform: translateX(10px);
+      }
+    }
+
+    /* 动画类 */
+    .float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .shake {
+      animation: shake 0.5s ease-in-out infinite;
+    }
+
+    /* 新增动画效果 */
+    @keyframes rotate3d {
+      0% {
+        transform: perspective(1000px) rotateY(0deg);
+      }
+
+      100% {
+        transform: perspective(1000px) rotateY(360deg);
+      }
+    }
+
+    @keyframes glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+      }
+
+      50% {
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+      }
+    }
+
+    @keyframes morph {
+
+      0%,
+      100% {
+        border-radius: 1rem;
+      }
+
+      50% {
+        border-radius: 2rem;
+      }
+    }
+
+    /* 新增动画类 */
+    .rotate3d {
+      animation: rotate3d 8s linear infinite;
+      transform-style: preserve-3d;
+    }
+
+    .glow {
+      animation: glow 3s ease-in-out infinite;
+    }
+
+    .morph {
+      animation: morph 8s ease-in-out infinite;
+    }
+
+    /* 新增动画效果 */
+    @keyframes shimmer {
+      0% {
+        background-position: -200% center;
+      }
+
+      100% {
+        background-position: 200% center;
+      }
+    }
+
+    /* 新增交互动画 */
+    .demo-section:hover .demo-box {
+      transform: scale(1.1) translateY(-5px);
+      box-shadow:
+        0 20px 40px rgba(79, 70, 229, 0.4),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+    }
+
+    /* 优化滚动条 */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(var(--primary),
+          var(--secondary),
+          var(--accent));
+      background-size: 200% 200%;
+      animation: gradient-flow 6s ease infinite;
+      border-radius: 4px;
+      transition: background 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+    }
+
+    /* 新增内容渐入动画 */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animation-card {
+      animation: fadeInUp 0.6s ease backwards;
+      animation-delay: calc(var(--card-index, 0) * 0.1s);
+    }
+
+    /* 添加新的动画关键帧 */
+    @keyframes spotlight {
+
+      0%,
+      100% {
+        background: radial-gradient(circle at 50% 50%,
+            rgba(255, 255, 255, 0.2) 0%,
+            transparent 50%);
+      }
+
+      50% {
+        background: radial-gradient(circle at 50% 50%,
+            rgba(255, 255, 255, 0.3) 0%,
+            transparent 25%);
+      }
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-30px);
+      }
+
+      75% {
+        transform: translateY(-15px);
+      }
+    }
+
+    @keyframes typing {
+      from {
+        width: 0;
+      }
+
+      to {
+        width: 80%;
+      }
+    }
+
+    @keyframes gradient-flow {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes flip {
+      0% {
+        transform: perspective(1000px) rotateX(0);
+      }
+
+      100% {
+        transform: perspective(1000px) rotateX(360deg);
+      }
+    }
+
+    @keyframes wave {
+      0% {
+        transform: skewX(0deg);
+      }
+
+      25% {
+        transform: skewX(15deg);
+      }
+
+      75% {
+        transform: skewX(-15deg);
+      }
+
+      100% {
+        transform: skewX(0deg);
+      }
+    }
+
+    @keyframes elastic {
+      0% {
+        transform: scale(1);
+      }
+
+      25% {
+        transform: scale(1.1);
+      }
+
+      50% {
+        transform: scale(0.9);
+      }
+
+      75% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes blur-in {
+      0% {
+        filter: blur(20px);
+        opacity: 0;
+      }
+
+      100% {
+        filter: blur(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes glitch {
+      0% {
+        clip-path: inset(50% 0 30% 0);
+        transform: translate(-5px, 5px);
+      }
+
+      50% {
+        clip-path: inset(20% 0 60% 0);
+        transform: translate(5px, -5px);
+      }
+
+      100% {
+        clip-path: inset(40% 0 40% 0);
+        transform: translate(0, 0);
+      }
+    }
+
+    @keyframes magnetic {
+
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(0);
+      }
+
+      25% {
+        transform: translate(5px, -5px) rotate(5deg);
+      }
+
+      75% {
+        transform: translate(-5px, 5px) rotate(-5deg);
+      }
+    }
+
+    /* 添加新的动画类 */
+    .spotlight {
+      animation: spotlight 3s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bounce {
+      animation: bounce 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    .typing {
+      width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid var(--accent);
+      animation: typing 3s steps(30) infinite alternate;
+    }
+
+    .gradient-flow {
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+      background-size: 200% 100%;
+      animation: gradient-flow 3s ease infinite;
+    }
+
+    .flip {
+      animation: flip 3s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+
+    .wave {
+      animation: wave 2s ease-in-out infinite;
+    }
+
+    .elastic {
+      animation: elastic 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    }
+
+    .blur-in {
+      animation: blur-in 1s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+    }
+
+    .glitch {
+      animation: glitch 0.5s ease-in-out infinite;
+      position: relative;
+    }
+
+    .magnetic {
+      animation: magnetic 3s ease-in-out infinite;
+    }
+
+    /* 在现有的 CSS 样式中添加新的动画关键帧 */
+    @keyframes floating-shadow {
+
+      0%,
+      100% {
+        box-shadow:
+          0 20px 40px var(--shadow),
+          0 0 0 2px rgba(255, 255, 255, 0.05),
+          0 0 20px rgba(79, 70, 229, 0.1);
+      }
+
+      50% {
+        box-shadow:
+          0 30px 50px var(--shadow),
+          0 0 0 3px rgba(255, 255, 255, 0.08),
+          0 0 30px rgba(79, 70, 229, 0.2);
+      }
+    }
+
+    @keyframes text-shimmer {
+      0% {
+        background-position: -100% center;
+      }
+
+      100% {
+        background-position: 200% center;
+      }
+    }
+
+    @keyframes card-hover {
+      0% {
+        transform: perspective(1000px) rotateX(0) rotateY(0);
+      }
+
+      100% {
+        transform: perspective(1000px) rotateX(2deg) rotateY(2deg);
+      }
+    }
+
+    /* 1. 霓虹发光效果 */
+    @keyframes neon-pulse {
+
+      0%,
+      100% {
+        text-shadow:
+          0 0 7px var(--accent),
+          0 0 10px var(--accent),
+          0 0 21px var(--accent),
+          0 0 42px var(--primary),
+          0 0 82px var(--primary),
+          0 0 92px var(--primary);
+      }
+
+      50% {
+        text-shadow:
+          0 0 4px var(--accent),
+          0 0 7px var(--accent),
+          0 0 13px var(--accent),
+          0 0 25px var(--primary),
+          0 0 45px var(--primary),
+          0 0 55px var(--primary);
+      }
+    }
+
+    /* 2. 液态波浪效果 */
+    @keyframes liquid-wave {
+      0% {
+        border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+      }
+
+      25% {
+        border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
+      }
+
+      50% {
+        border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
+      }
+
+      75% {
+        border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%;
+      }
+
+      100% {
+        border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+      }
+    }
+
+    /* 3. 全息投影效果 */
+    @keyframes hologram {
+
+      0%,
+      100% {
+        opacity: 1;
+        filter: hue-rotate(0deg) saturate(1) brightness(1);
+      }
+
+      50% {
+        opacity: 0.8;
+        filter: hue-rotate(180deg) saturate(1.5) brightness(1.2);
+      }
+    }
+
+    /* 4. 磁性悬浮效果 */
+    @keyframes magnetic-float {
+
+      0%,
+      100% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+        filter: brightness(1);
+      }
+
+      25% {
+        transform: translateY(-8px) translateX(4px) rotate(2deg);
+        filter: brightness(1.1);
+      }
+
+      75% {
+        transform: translateY(8px) translateX(-4px) rotate(-2deg);
+        filter: brightness(0.9);
+      }
+    }
+
+    /* 5. 能量脉冲效果 */
+    @keyframes energy-pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+        transform: scale(1);
+      }
+
+      70% {
+        box-shadow: 0 0 0 20px rgba(79, 70, 229, 0);
+        transform: scale(1.05);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+        transform: scale(1);
+      }
+    }
+
+    /* 6. 3D翻页效果 */
+    @keyframes page-flip {
+      0% {
+        transform: perspective(1200px) rotateY(0);
+      }
+
+      100% {
+        transform: perspective(1200px) rotateY(180deg);
+      }
+    }
+
+    /* 7. 量子跳跃效果 */
+    @keyframes quantum-jump {
+
+      0%,
+      100% {
+        transform: scale(1) translateZ(0);
+        opacity: 1;
+      }
+
+      25% {
+        transform: scale(0.95) translateZ(-50px);
+        opacity: 0.8;
+      }
+
+      75% {
+        transform: scale(1.05) translateZ(50px);
+        opacity: 0.9;
+      }
+    }
+
+    /* 8. 电流流动效果 */
+    @keyframes electric-flow {
+      0% {
+        background-position: 0% 0%;
+        filter: brightness(1) contrast(1);
+      }
+
+      50% {
+        background-position: 100% 0%;
+        filter: brightness(1.2) contrast(1.2);
+      }
+
+      100% {
+        background-position: 0% 0%;
+        filter: brightness(1) contrast(1);
+      }
+    }
+
+    /* 9. 粒子扩散效果 */
+    @keyframes particle-burst {
+      0% {
+        transform: scale(0.9);
+        opacity: 0.8;
+        filter: blur(0px);
+      }
+
+      50% {
+        transform: scale(1.1);
+        opacity: 1;
+        filter: blur(2px);
+      }
+
+      100% {
+        transform: scale(0.9);
+        opacity: 0.8;
+        filter: blur(0px);
+      }
+    }
+
+    /* 10. 全息干扰效果 */
+    @keyframes holographic-glitch {
+
+      0%,
+      100% {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        transform: translate(0);
+        opacity: 1;
+      }
+
+      20% {
+        clip-path: polygon(0 15%, 100% 5%, 100% 85%, 0 95%);
+        transform: translate(-2px);
+        opacity: 0.9;
+      }
+
+      40% {
+        clip-path: polygon(0 10%, 100% 20%, 100% 90%, 0 80%);
+        transform: translate(2px);
+        opacity: 0.8;
+      }
+    }
+
+    /* 添加动画类 */
+    .neon {
+      animation: neon-pulse 2s infinite;
+    }
+
+    .liquid {
+      animation: liquid-wave 8s ease-in-out infinite;
+    }
+
+    .hologram {
+      animation: hologram 3s infinite;
+      backdrop-filter: blur(5px);
+    }
+
+    .magnetic-hover {
+      animation: magnetic-float 4s ease-in-out infinite;
+    }
+
+    .energy {
+      animation: energy-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .page-flip {
+      animation: page-flip 1.5s ease-in-out;
+      backface-visibility: hidden;
+    }
+
+    .quantum {
+      animation: quantum-jump 3s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+
+    .electric {
+      background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary), var(--primary));
+      background-size: 300% 100%;
+      animation: electric-flow 3s linear infinite;
+    }
+
+    .particle {
+      animation: particle-burst 2s ease-in-out infinite;
+    }
+
+    .holographic {
+      animation: holographic-glitch 2.5s infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 在 <style> 标签内添加搜索框样式 */
+    .search-container {
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      width: 100%;
+      max-width: 600px;
+      padding: 0 2rem;
+    }
+
+    .search-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      backdrop-filter: blur(24px);
+      box-shadow:
+        0 10px 30px var(--shadow),
+        inset 0 0 0 1px var(--glass);
+      transition: all 0.3s ease;
+    }
+
+    .search-box:focus-within {
+      transform: translateY(-2px);
+      box-shadow:
+        0 20px 40px var(--shadow),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+        0 0 20px rgba(79, 70, 229, 0.2);
+    }
+
+    .search-box input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.1rem;
+      outline: none;
+    }
+
+    .search-box input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-icon {
+      color: var(--accent);
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    .search-box:focus-within .search-icon {
+      opacity: 1;
+    }
+
+    /* 添加卡片过渡动画 */
+    .animation-card {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .animation-card.hidden {
+      opacity: 0;
+      transform: scale(0.8);
+      pointer-events: none;
+    }
+
+    /* 调整容器上边距，为搜索框留出空间 */
+    .container {
+      padding-top: 8rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="search-container">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="搜索动画效果...">
+      <div class="search-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>现代动画库</h1>
+
+    <!-- 悬浮动画卡片 -->
+    <div class="animation-card">
+      <h2>悬浮动画</h2>
+      <div class="demo-section">
+        <div class="demo-box float"></div>
+        <div>
+          <p>一个平滑优雅的上下浮动效果，为界面增添生动的视觉层次。适用于需要突出显示的UI元素，让用户体验更加自然流畅。</p>
+          <p>完美适用于：</p>
+          <ul>
+            <li>功能引导图标</li>
+            <li>重要操作按钮</li>
+            <li>产品展示卡片</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="float"&gt;浮动的元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 脉冲动画卡片 -->
+    <div class="animation-card">
+      <h2>脉冲动画</h2>
+      <div class="demo-section">
+        <div class="demo-box pulse"></div>
+        <div>
+          <p>平滑的缩放效果，用于吸引用户注意力。</p>
+          <p>建议用于：通知提醒、重要按钮、标记等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulse 2s ease-in-out infinite;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="pulse"&gt;脉冲的元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 抖动动画卡片 -->
+    <div class="animation-card">
+      <h2>抖动动画</h2>
+      <div class="demo-section">
+        <div class="demo-box shake"></div>
+        <div>
+          <p>快速的左右抖动效果，用于表示错误或需要注意。</p>
+          <p>建议用于：表单验证、错误提示等场景</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    25% {
+      transform: translateX(-10px);
+    }
+
+    75% {
+      transform: translateX(10px);
+    }
+  }
+
+  .shake {
+    animation: shake 0.5s ease-in-out infinite;
+  }</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="shake"&gt;抖动的元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 3D旋转动画卡片 -->
+    <div class="animation-card">
+      <h2>3D旋转</h2>
+      <div class="demo-section">
+        <div class="demo-box rotate3d"></div>
+        <div>
+          <p>令人印象深刻的3D旋转效果，为界面添加空间感。</p>
+          <p>适用于：产品展示、加载动画、特效展示等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes rotate3d {
+    0% { transform: perspective(1000px) rotateY(0deg); }
+    100% { transform: perspective(1000px) rotateY(360deg); }
+}
+
+.rotate3d {
+    animation: rotate3d 8s linear infinite;
+    transform-style: preserve-3d;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="rotate3d"&gt;3D旋转的元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 发光效果动画卡片 -->
+    <div class="animation-card">
+      <h2>发光效果</h2>
+      <div class="demo-section">
+        <div class="demo-box glow"></div>
+        <div>
+          <p>柔和的光晕效果，增添视觉层次感。</p>
+          <p>适用于：强调元素、状态指示、交互反馈等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.6); }
+}
+
+.glow {
+    animation: glow 3s ease-in-out infinite;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="glow"&gt;发光效果的元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 形态变换动画卡片 -->
+    <div class="animation-card">
+      <h2>形态变换</h2>
+      <div class="demo-section">
+        <div class="demo-box morph"></div>
+        <div>
+          <p>平滑的形状变换效果，展现流动的设计感。</p>
+          <p>适用于：背景装饰、loading动画、状态切换等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes morph {
+    0%, 100% { border-radius: 1rem; }
+    50% { border-radius: 2rem; }
+}
+
+.morph {
+    animation: morph 8s ease-in-out infinite;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="morph"&gt;形态变换的元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 聚光动画 -->
+    <div class="animation-card">
+      <h2>聚光效果</h2>
+      <div class="demo-section">
+        <div class="demo-box spotlight"></div>
+        <div>
+          <p>优雅的聚光扫描效果，为界面添加动态光影。</p>
+          <p>适用于：卡片悬浮、按钮特效、页面过渡等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes spotlight {
+  0%, 100% {
+    background: radial-gradient(circle at 50% 50%,
+      rgba(255, 255, 255, 0.2) 0%,
+      transparent 50%);
+  }
+  50% {
+    background: radial-gradient(circle at 50% 50%,
+      rgba(255, 255, 255, 0.3) 0%,
+      transparent 25%);
+  }
+}
+
+.spotlight {
+  animation: spotlight 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="spotlight"&gt;聚光效果元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 弹跳动画 -->
+    <div class="animation-card">
+      <h2>弹性弹跳</h2>
+      <div class="demo-section">
+        <div class="demo-box bounce"></div>
+        <div>
+          <p>富有弹性的跳跃效果，增添活力与趣味。</p>
+          <p>适用于：交互反馈、加载动画、强调元素等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-30px); }
+  75% { transform: translateY(-15px); }
+}
+
+.bounce {
+  animation: bounce 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="bounce"&gt;弹跳元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 打字效果 -->
+    <div class="animation-card">
+      <h2>打字效果</h2>
+      <div class="demo-section">
+        <div class="demo-box typing"></div>
+        <div>
+          <p>模拟打字机效果，创造动态文本展示。</p>
+          <p>适用于：标题展示、文本输入、提示信息等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.typing {
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid currentColor;
+  animation: typing 3s steps(30) infinite alternate;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="typing"&gt;打字效果文本&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 渐变流动 -->
+    <div class="animation-card">
+      <h2>渐变流动</h2>
+      <div class="demo-section">
+        <div class="demo-box gradient-flow"></div>
+        <div>
+          <p>流动的渐变背景，营造动态视觉效果。</p>
+          <p>适用于：按钮背景、卡片装饰、状态指示等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-flow {
+  background: linear-gradient(90deg, #4f46e5, #7c3aed, #0ea5e9);
+  background-size: 200% 100%;
+  animation: gradient-flow 3s ease infinite;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="gradient-flow"&gt;渐变流动元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 翻转效果 -->
+    <div class="animation-card">
+      <h2>3D翻转</h2>
+      <div class="demo-section">
+        <div class="demo-box flip"></div>
+        <div>
+          <p>平滑的3D翻转动画，展现空间感。</p>
+          <p>适用于：卡片翻转、切换效果、过渡动画等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes flip {
+  0% { transform: perspective(1000px) rotateX(0); }
+  100% { transform: perspective(1000px) rotateX(360deg); }
+}
+
+.flip {
+  animation: flip 3s ease-in-out infinite;
+  transform-style: preserve-3d;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="flip"&gt;翻转效果元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 波浪效果 -->
+    <div class="animation-card">
+      <h2>波浪扭动</h2>
+      <div class="demo-section">
+        <div class="demo-box wave"></div>
+        <div>
+          <p>柔和的波浪扭动效果，增添流动感。</p>
+          <p>适用于：加载状态、背景动画、装饰效果等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes wave {
+  0% { transform: skewX(0deg); }
+  25% { transform: skewX(15deg); }
+  75% { transform: skewX(-15deg); }
+  100% { transform: skewX(0deg); }
+}
+
+.wave {
+  animation: wave 2s ease-in-out infinite;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="wave"&gt;波浪效果元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 弹性缩放 -->
+    <div class="animation-card">
+      <h2>弹性缩放</h2>
+      <div class="demo-section">
+        <div class="demo-box elastic"></div>
+        <div>
+          <p>有弹性的缩放效果，提供生动的反馈。</p>
+          <p>适用于：点击反馈、强调动画、状态变化等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes elastic {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.1); }
+  50% { transform: scale(0.9); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.elastic {
+  animation: elastic 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="elastic"&gt;弹性缩放元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 模糊渐入 -->
+    <div class="animation-card">
+      <h2>模糊渐入</h2>
+      <div class="demo-section">
+        <div class="demo-box blur-in"></div>
+        <div>
+          <p>平滑的模糊渐入效果，创造层次感。</p>
+          <p>适用于：页面切换、弹窗显示、内容加载等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes blur-in {
+  0% { 
+    filter: blur(20px);
+    opacity: 0;
+  }
+  100% {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+.blur-in {
+  animation: blur-in 1s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="blur-in"&gt;模糊渐入元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 故障效果 -->
+    <div class="animation-card">
+      <h2>故障效果</h2>
+      <div class="demo-section">
+        <div class="demo-box glitch"></div>
+        <div>
+          <p>现代感的故障动画效果，增添科技感。</p>
+          <p>适用于：错误提示、特效展示、强调效果等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes glitch {
+  0% {
+    clip-path: inset(50% 0 30% 0);
+    transform: translate(-5px, 5px);
+  }
+  50% {
+    clip-path: inset(20% 0 60% 0);
+    transform: translate(5px, -5px);
+  }
+  100% {
+    clip-path: inset(40% 0 40% 0);
+    transform: translate(0, 0);
+  }
+}
+
+.glitch {
+  animation: glitch 0.5s ease-in-out infinite;
+  position: relative;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="glitch"&gt;故障效果元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 磁性吸附 -->
+    <div class="animation-card">
+      <h2>磁性吸附</h2>
+      <div class="demo-section">
+        <div class="demo-box magnetic"></div>
+        <div>
+          <p>模拟磁性吸附的动态效果，增强交互感。</p>
+          <p>适用于：悬浮交互、按钮动效、图标动画等</p>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes magnetic {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  25% { transform: translate(5px, -5px) rotate(5deg); }
+  75% { transform: translate(-5px, 5px) rotate(-5deg); }
+}
+
+.magnetic {
+  animation: magnetic 3s ease-in-out infinite;
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="magnetic"&gt;磁性吸附元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 霓虹发光动画卡片 -->
+    <div class="animation-card">
+      <h2>霓虹发光</h2>
+      <div class="demo-section">
+        <div class="demo-box neon"></div>
+        <div>
+          <p>炫酷的霓虹灯发光效果，营造科技感和未来感。</p>
+          <p>适用场景：</p>
+          <ul>
+            <li>重点标题文字</li>
+            <li>特殊状态提示</li>
+            <li>强调性UI元素</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes neon-pulse {
+  0%, 100% {
+    text-shadow: 
+      0 0 7px var(--accent),
+      0 0 10px var(--accent),
+      0 0 21px var(--accent),
+      0 0 42px var(--primary),
+      0 0 82px var(--primary),
+      0 0 92px var(--primary);
+  }
+  50% {
+    text-shadow: 
+      0 0 4px var(--accent),
+      0 0 7px var(--accent),
+      0 0 13px var(--accent),
+      0 0 25px var(--primary),
+      0 0 45px var(--primary),
+      0 0 55px var(--primary);
+  }
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="neon"&gt;霓虹文本&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 液态波浪动画卡片 -->
+    <div class="animation-card">
+      <h2>液态波浪</h2>
+      <div class="demo-section">
+        <div class="demo-box liquid"></div>
+        <div>
+          <p>流动的液态变形效果，为界面添加有机的动态感。</p>
+          <p>适用场景：</p>
+          <ul>
+            <li>加载状态指示</li>
+            <li>背景装饰元素</li>
+            <li>交互反馈效果</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes liquid-wave {
+  0% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+  25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
+  50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
+  75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
+  100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="liquid"&gt;液态元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 全息投影动画卡片 -->
+    <div class="animation-card">
+      <h2>全息投影</h2>
+      <div class="demo-section">
+        <div class="demo-box hologram"></div>
+        <div>
+          <p>模拟全息投影的视觉效果，展现未来科技感。</p>
+          <p>适用场景：</p>
+          <ul>
+            <li>高科技产品展示</li>
+            <li>特效背景</li>
+            <li>重要信息展示</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes hologram {
+  0%, 100% {
+    opacity: 1;
+    filter: hue-rotate(0deg) saturate(1) brightness(1);
+  }
+  50% {
+    opacity: 0.8;
+    filter: hue-rotate(180deg) saturate(1.5) brightness(1.2);
+  }
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="hologram"&gt;全息内容&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 磁性悬浮效果卡片 -->
+    <div class="animation-card">
+      <h2>磁性悬浮</h2>
+      <div class="demo-section">
+        <div class="demo-box magnetic-hover"></div>
+        <div>
+          <p>模拟磁场作用的悬浮效果，增强交互体验。</p>
+          <p>适用场景：</p>
+          <ul>
+            <li>悬浮菜单</li>
+            <li>卡片交互</li>
+            <li>按钮特效</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes magnetic-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    filter: brightness(1);
+  }
+  25% {
+    transform: translateY(-8px) translateX(4px) rotate(2deg);
+    filter: brightness(1.1);
+  }
+  75% {
+    transform: translateY(8px) translateX(-4px) rotate(-2deg);
+    filter: brightness(0.9);
+  }
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="magnetic-hover"&gt;磁性元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 能量脉冲效果卡片 -->
+    <div class="animation-card">
+      <h2>能量脉冲</h2>
+      <div class="demo-section">
+        <div class="demo-box energy"></div>
+        <div>
+          <p>能量场扩散效果，突出重要元素。</p>
+          <p>适用场景：</p>
+          <ul>
+            <li>通知提醒</li>
+            <li>状态变化</li>
+            <li>操作反馈</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes energy-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+    transform: scale(1);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(79, 70, 229, 0);
+    transform: scale(1.05);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+    transform: scale(1);
+  }
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="energy"&gt;能量元素&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 3D翻页效果卡片 -->
+    <div class="animation-card">
+      <h2>3D翻页</h2>
+      <div class="demo-section">
+        <div class="demo-box page-flip"></div>
+        <div>
+          <p>真实的3D翻页动画效果，增强空间感。</p>
+          <p>适用场景：</p>
+          <ul>
+            <li>电子书翻页</li>
+            <li>卡片切换</li>
+            <li>内容过渡</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes page-flip {
+  0% {
+    transform: perspective(1200px) rotateY(0);
+  }
+  100% {
+    transform: perspective(1200px) rotateY(180deg);
+  }
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="page-flip"&gt;翻页内容&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 量子跳跃效果卡片 -->
+    <div class="animation-card">
+      <h2>量子跳跃</h2>
+      <div class="demo-section">
+        <div class="demo-box quantum"></div>
+        <div>
+          <p>模拟量子态的跳跃变化，展现科技感。</p>
+          <p>适用场景：</p>
+          <ul>
+            <li>加载动画</li>
+            <li>状态切换</li>
+            <li>特效展示</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes quantum-jump {
+  0%, 100% {
+    transform: scale(1) translateZ(0);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(0.95) translateZ(-50px);
+    opacity: 0.8;
+  }
+  75% {
+    transform: scale(1.05) translateZ(50px);
+    opacity: 0.9;
+  }
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="quantum"&gt;量子效果&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 电流流动效果卡片 -->
+    <div class="animation-card">
+      <h2>电流流动</h2>
+      <div class="demo-section">
+        <div class="demo-box electric"></div>
+        <div>
+          <p>模拟电流在导体中流动的效果，增强科技感。</p>
+          <p>适用场景：</p>
+          <ul>
+            <li>进度条</li>
+            <li>数据流动</li>
+            <li>能量效果</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes electric-flow {
+  0% {
+    background-position: 0% 0%;
+    filter: brightness(1) contrast(1);
+  }
+  50% {
+    background-position: 100% 0%;
+    filter: brightness(1.2) contrast(1.2);
+  }
+  100% {
+    background-position: 0% 0%;
+    filter: brightness(1) contrast(1);
+  }
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="electric"&gt;电流效果&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 粒子扩散效果卡片 -->
+    <div class="animation-card">
+      <h2>粒子扩散</h2>
+      <div class="demo-section">
+        <div class="demo-box particle"></div>
+        <div>
+          <p>粒子聚合与扩散的视觉效果，增添动感。</p>
+          <p>适用场景：</p>
+          <ul>
+            <li>特效动画</li>
+            <li>转场效果</li>
+            <li>交互反馈</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes particle-burst {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+    filter: blur(0px);
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+    filter: blur(2px);
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+    filter: blur(0px);
+  }
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="particle"&gt;粒��效果&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- 全息干扰效果卡片 -->
+    <div class="animation-card">
+      <h2>全息干扰</h2>
+      <div class="demo-section">
+        <div class="demo-box holographic"></div>
+        <div>
+          <p>全息图像的故障干扰效果，展现未来感。</p>
+          <p>适用场景：</p>
+          <ul>
+            <li>故障艺术</li>
+            <li>科幻界面</li>
+            <li>特殊效果</li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 class="usage-title">CSS 代码：</h3>
+        <pre><code class="language-css">@keyframes holographic-glitch {
+  0%, 100% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transform: translate(0);
+    opacity: 1;
+  }
+  20% {
+    clip-path: polygon(0 15%, 100% 5%, 100% 85%, 0 95%);
+    transform: translate(-2px);
+    opacity: 0.9;
+  }
+  40% {
+    clip-path: polygon(0 10%, 100% 20%, 100% 90%, 0 80%);
+    transform: translate(2px);
+    opacity: 0.8;
+  }
+}</code></pre>
+        <h3 class="usage-title">HTML 使用：</h3>
+        <pre><code class="language-html">&lt;div class="holographic"&gt;全息效果&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- 代码高亮脚本 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-css.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // 为每个卡片添加动画延迟索引
+      document.querySelectorAll('.animation-card').forEach((card, index) => {
+        card.style.setProperty('--card-index', index);
+      });
+
+      // 点击切换代码显示的功能
+      const demoSections = document.querySelectorAll('.demo-section');
+
+      demoSections.forEach(section => {
+        section.addEventListener('click', function () {
+          const card = this.closest('.animation-card');
+          const codeSection = card.querySelector('.code-section');
+
+          if (codeSection.classList.contains('show')) {
+            codeSection.classList.remove('show');
+            this.classList.remove('active');
+          } else {
+            // 隐藏其他代码区域
+            document.querySelectorAll('.code-section').forEach(cs => {
+              cs.classList.remove('show');
+            });
+            document.querySelectorAll('.demo-section').forEach(ds => {
+              ds.classList.remove('active');
+            });
+
+            // 显示当前代码区域
+            codeSection.classList.add('show');
+            this.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // 在现有脚本的末尾添加搜索功能
+    const searchInput = document.getElementById('searchInput');
+    const cards = document.querySelectorAll('.animation-card');
+
+    searchInput.addEventListener('input', function () {
+      const searchTerm = this.value.toLowerCase();
+      const container = document.querySelector('.container');
+      const cardsArray = Array.from(cards);
+
+      // 对卡片进行排序
+      cardsArray.sort((a, b) => {
+        const aTitle = a.querySelector('h2').textContent.toLowerCase();
+        const bTitle = b.querySelector('h2').textContent.toLowerCase();
+        const aDescription = a.querySelector('p').textContent.toLowerCase();
+        const bDescription = b.querySelector('p').textContent.toLowerCase();
+        const aTags = Array.from(a.querySelectorAll('li')).map(li => li.textContent.toLowerCase());
+        const bTags = Array.from(b.querySelectorAll('li')).map(li => li.textContent.toLowerCase());
+
+        const aMatch =
+          aTitle.includes(searchTerm) ||
+          aDescription.includes(searchTerm) ||
+          aTags.some(tag => tag.includes(searchTerm));
+
+        const bMatch =
+          bTitle.includes(searchTerm) ||
+          bDescription.includes(searchTerm) ||
+          bTags.some(tag => tag.includes(searchTerm));
+
+        if (aMatch && !bMatch) return -1;
+        if (!aMatch && bMatch) return 1;
+        return 0;
+      });
+
+      // 重新排列卡片
+      cardsArray.forEach((card, index) => {
+        // 更新动画延迟
+        card.style.setProperty('--card-index', index);
+
+        const title = card.querySelector('h2').textContent.toLowerCase();
+        const description = card.querySelector('p').textContent.toLowerCase();
+        const tags = Array.from(card.querySelectorAll('li')).map(li => li.textContent.toLowerCase());
+
+        const isMatch =
+          title.includes(searchTerm) ||
+          description.includes(searchTerm) ||
+          tags.some(tag => tag.includes(searchTerm));
+
+        if (isMatch) {
+          card.classList.remove('hidden');
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'scale(1)';
+          }, 50);
+        } else {
+          card.classList.add('hidden');
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.8)';
+        }
+
+        // 将卡片移动到新位置
+        container.appendChild(card);
+      });
+    });
+
+    // 添加搜索框快捷键
+    document.addEventListener('keydown', function (e) {
+      // 按下 Ctrl + K 或 Command + K 时聚焦搜索框
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+      }
+
+      // 按下 ESC 键时清空搜索框
+      if (e.key === 'Escape') {
+        searchInput.value = '';
+        searchInput.blur();
+        // 触发 input 事件以重置搜索结果
+        searchInput.dispatchEvent(new Event('input'));
+      }
+    });
+  </script>
+
+
+</body>
+
+</html>
